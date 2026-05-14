@@ -112,16 +112,25 @@ export default function StartScreen() {
           START GAME
         </motion.button>
 
+        {/* Footer */}
+        <motion.p variants={item} className="mt-6 text-slate-600 text-xs font-mono">
+          30 rounds · Real credit risk mechanics · Firebase leaderboard
+        </motion.p>
+
+        {/* Made by */}
+        <motion.p variants={item} className="mt-1 text-slate-700 text-xs font-mono">
+          made by <span className="text-slate-500">Mehul Bisht</span>
+        </motion.p>
+
         {/* Leaderboard Button */}
-        <motion.button
-          variants={item}
-          onClick={() => setShowLeaderboard(s => !s)}
-          className="mt-4 px-8 py-2.5 rounded-xl font-mono font-bold text-sm tracking-widest uppercase cursor-pointer border border-[#00D4FF]/30 bg-[#00D4FF]/10 text-[#00D4FF] hover:bg-[#00D4FF]/20 transition-colors"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          {showLeaderboard ? 'HIDE LEADERBOARD' : '🏆 LEADERBOARD'}
-        </motion.button>
+        <motion.div variants={item} className="mt-10">
+          <button
+            onClick={() => setShowLeaderboard(s => !s)}
+            className="px-8 py-2.5 rounded-xl font-mono font-bold text-sm tracking-widest uppercase cursor-pointer border border-[#00D4FF]/30 bg-[#00D4FF]/10 text-[#00D4FF] hover:bg-[#00D4FF]/20 transition-colors"
+          >
+            {showLeaderboard ? 'HIDE LEADERBOARD' : '🏆 LEADERBOARD'}
+          </button>
+        </motion.div>
 
         {/* Leaderboard Panel */}
         <AnimatePresence>
@@ -129,7 +138,7 @@ export default function StartScreen() {
             <motion.div
               key="leaderboard"
               initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               className="overflow-hidden"
             >
@@ -148,11 +157,6 @@ export default function StartScreen() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Footer */}
-        <motion.p variants={item} className="mt-8 text-slate-600 text-xs font-mono">
-          30 rounds · Real credit risk mechanics · Firebase leaderboard
-        </motion.p>
       </motion.div>
     </div>
   );
