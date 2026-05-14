@@ -38,7 +38,7 @@ export default function StartScreen() {
         {/* Badge */}
         <motion.div variants={item} className="mb-6">
           <span className="inline-block px-4 py-1.5 rounded-full border border-[#00D4FF]/30 bg-[#00D4FF]/10 text-[#00D4FF] text-xs font-mono tracking-widest uppercase">
-            Fintech Arcade
+            Lending Arcade
           </span>
         </motion.div>
 
@@ -53,7 +53,7 @@ export default function StartScreen() {
             backgroundClip: 'text',
           }}
         >
-          MARKET<br />MAYHEM
+          LOAN<br />WOLF
         </motion.h1>
 
         {/* Tagline */}

@@ -55,6 +55,8 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
     [-150, -50, 0],
     [1, 0.3, 0]
   );
+  const approveOpacity = useTransform(x, [50, 150], [0, 1]);
+  const rejectOpacity = useTransform(x, [-150, -50], [1, 0]);
 
   const dti = ((borrower.monthlyDebt * 12) / borrower.annualIncome) * 100;
   const band = getCreditBand(borrower.hiddenPD);
@@ -120,7 +122,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
       <motion.div
         className="absolute inset-0 rounded-xl flex items-center justify-center z-10 pointer-events-none"
         style={{
-          opacity: useTransform(x, [50, 150], [0, 1]),
+          opacity: approveOpacity,
           background: 'rgba(0,255,157,0.15)',
           border: '2px solid #00FF9D',
         }}
@@ -134,7 +136,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
       <motion.div
         className="absolute inset-0 rounded-xl flex items-center justify-center z-10 pointer-events-none"
         style={{
-          opacity: useTransform(x, [-150, -50], [1, 0]),
+          opacity: rejectOpacity,
           background: 'rgba(255,51,102,0.15)',
           border: '2px solid #FF3366',
         }}

@@ -1,9 +1,21 @@
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '../hooks/useGameStore';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 import { calculatePortfolioEL } from '../game/defaultEngine';
 
 export default function MetricsPanel() {
-  const state = useGameStore(s => s);
+  const state = useGameStore(useShallow(s => ({
+    cash: s.cash,
+    startingCash: s.startingCash,
+    totalProfit: s.totalProfit,
+    reputation: s.reputation,
+    round: s.round,
+    maxRounds: s.maxRounds,
+    activeLoans: s.activeLoans,
+    activeEvents: s.activeEvents,
+    loanHistory: s.loanHistory,
+    score: s.score,
+  })));
 
   const portfolioValue = state.activeLoans
     .filter(l => l.status === 'active')

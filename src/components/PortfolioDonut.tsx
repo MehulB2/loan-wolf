@@ -36,7 +36,8 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 }
 
 export default function PortfolioDonut() {
-  const activeLoans = useGameStore(s => s.activeLoans.filter(l => l.status === 'active'));
+  const allLoans = useGameStore(s => s.activeLoans);
+  const activeLoans = allLoans.filter(l => l.status === 'active');
 
   const industryMap = new Map<string, number>();
   for (const loan of activeLoans) {

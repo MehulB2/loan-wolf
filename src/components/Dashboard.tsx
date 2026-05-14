@@ -36,7 +36,7 @@ export default function Dashboard() {
               backgroundClip: 'text',
             }}
           >
-            MARKET MAYHEM
+            LOAN WOLF
           </span>
           <span className="text-xs font-mono text-slate-500">Lending Simulator</span>
         </div>

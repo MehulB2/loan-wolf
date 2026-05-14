@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '../hooks/useGameStore';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 import { submitScore, getLeaderboard, type LeaderboardEntry } from '../utils/firebase';
 import Leaderboard from './Leaderboard';
 
 export default function GameOver() {
-  const state = useGameStore(s => s);
+  const state = useGameStore(useShallow(s => ({
+    result: s.result,
+    cash: s.cash,
+    totalProfit: s.totalProfit,
+    round: s.round,
+    maxRounds: s.maxRounds,
+    reputation: s.reputation,
+    loanHistory: s.loanHistory,
+    score: s.score,
+  })));
   const resetGame = useGameStore(s => s.resetGame);
 
   const [playerName, setPlayerName] = useState('');
