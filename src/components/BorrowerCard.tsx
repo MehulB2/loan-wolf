@@ -74,12 +74,13 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
     setIsDragging(false);
     dragStarted.current = false;
 
-    const threshold = 100;
-    if (info.offset.x > threshold) {
+    const threshold = 80;
+    const velocityThreshold = 400;
+    if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
       onSwipe('right');
-    } else if (info.offset.x < -threshold) {
+    } else if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
       onSwipe('left');
-    } else if (info.offset.y < -threshold) {
+    } else if (info.offset.y < -threshold || info.velocity.y < -velocityThreshold) {
       onSwipe('up');
     } else {
       x.set(0);
@@ -109,7 +110,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
   return (
     <motion.div
       className="absolute w-full h-full cursor-grab active:cursor-grabbing select-none"
-      style={{ x, y, rotate, zIndex: 20 }}
+      style={{ x, y, rotate, zIndex: 20, touchAction: 'none' }}
       drag
       dragConstraints={{ left: -300, right: 300, top: -300, bottom: 0 }}
       dragElastic={0.9}

@@ -69,7 +69,7 @@ export default function CardStack() {
       )}
 
       {/* Card Stack */}
-      <div className="relative w-full" style={{ height: '460px' }}>
+      <div className="relative w-full" style={{ height: 'min(460px, calc(100svh - 260px))' }}>
         <AnimatePresence>
           {visibleBorrowers.map((borrower, index) => (
             <motion.div

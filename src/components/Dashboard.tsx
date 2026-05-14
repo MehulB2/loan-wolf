@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '../hooks/useGameStore';
 import MetricsPanel from './MetricsPanel';
 import CardStack from './CardStack';
@@ -11,6 +12,12 @@ export default function Dashboard() {
   const lastRoundOutcomes = useGameStore(s => s.lastRoundOutcomes);
   const round = useGameStore(s => s.round);
   const phase = useGameStore(s => s.phase);
+  const mobile = useGameStore(useShallow(s => ({
+    cash: s.cash,
+    startingCash: s.startingCash,
+    totalProfit: s.totalProfit,
+    reputation: s.reputation,
+  })));
 
   const recentOutcomes = lastRoundOutcomes.slice(-5).reverse();
 
@@ -48,10 +55,32 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Mobile-only compact metrics strip */}
+      <div className="flex md:hidden items-center gap-2 px-4 py-2 border-b border-[#1E2435] bg-[#0D1120]">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs text-slate-500 font-mono">Cash</div>
+          <div className={`text-sm font-mono font-bold truncate ${mobile.cash >= mobile.startingCash * 0.5 ? 'text-[#00FF9D]' : mobile.cash >= mobile.startingCash * 0.25 ? 'text-[#FFB800]' : 'text-[#FF3366]'}`}>
+            {formatCurrency(mobile.cash)}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs text-slate-500 font-mono">P&L</div>
+          <div className={`text-sm font-mono font-bold truncate ${mobile.totalProfit >= 0 ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
+            {mobile.totalProfit >= 0 ? '+' : ''}{formatCurrency(mobile.totalProfit)}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs text-slate-500 font-mono">Rep</div>
+          <div className={`text-sm font-mono font-bold ${mobile.reputation >= 70 ? 'text-[#00FF9D]' : mobile.reputation >= 40 ? 'text-[#FFB800]' : 'text-[#FF3366]'}`}>
+            {mobile.reputation}/100
+          </div>
+        </div>
+      </div>
+
       {/* Main layout */}
       <div className="flex-1 flex gap-0 overflow-hidden" style={{ maxHeight: 'calc(100vh - 120px)' }}>
-        {/* Left: Metrics */}
-        <div className="w-64 flex-shrink-0 p-4 border-r border-[#1E2435] overflow-y-auto">
+        {/* Left: Metrics — desktop only */}
+        <div className="hidden md:block w-64 flex-shrink-0 p-4 border-r border-[#1E2435] overflow-y-auto">
           <MetricsPanel />
         </div>
 
@@ -71,8 +100,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right: Portfolio + Outcomes */}
-        <div className="w-72 flex-shrink-0 p-4 border-l border-[#1E2435] overflow-y-auto space-y-4">
+        {/* Right: Portfolio + Outcomes — desktop only */}
+        <div className="hidden md:block w-72 flex-shrink-0 p-4 border-l border-[#1E2435] overflow-y-auto space-y-4">
           <PortfolioDonut />
 
           {/* Recent Outcomes */}
@@ -109,7 +138,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom: Performance Chart */}
-      <div className="h-48 flex-shrink-0 border-t border-[#1E2435] px-4 py-3">
+      <div className="h-32 md:h-48 flex-shrink-0 border-t border-[#1E2435] px-4 py-3">
         <PerformanceChart />
       </div>
     </motion.div>
