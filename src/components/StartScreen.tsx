@@ -1,6 +1,9 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { useGameStore } from '../hooks/useGameStore';
+import { getLeaderboard, type LeaderboardEntry } from '../utils/firebase';
+import Leaderboard from './Leaderboard';
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -17,6 +20,18 @@ const item: Variants = {
 
 export default function StartScreen() {
   const startGame = useGameStore(s => s.startGame);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!showLeaderboard || entries.length > 0) return;
+    setLoading(true);
+    getLeaderboard().then(data => {
+      setEntries(data);
+      setLoading(false);
+    });
+  }, [showLeaderboard, entries.length]);
 
   return (
     <div className="min-h-screen bg-[#0A0E1A] flex items-center justify-center px-4 relative overflow-hidden">
@@ -96,6 +111,43 @@ export default function StartScreen() {
         >
           START GAME
         </motion.button>
+
+        {/* Leaderboard Button */}
+        <motion.button
+          variants={item}
+          onClick={() => setShowLeaderboard(s => !s)}
+          className="mt-4 px-8 py-2.5 rounded-xl font-mono font-bold text-sm tracking-widest uppercase cursor-pointer border border-[#00D4FF]/30 bg-[#00D4FF]/10 text-[#00D4FF] hover:bg-[#00D4FF]/20 transition-colors"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          {showLeaderboard ? 'HIDE LEADERBOARD' : '🏆 LEADERBOARD'}
+        </motion.button>
+
+        {/* Leaderboard Panel */}
+        <AnimatePresence>
+          {showLeaderboard && (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="rounded-2xl border border-[#1E2435] bg-[#141824]/80 backdrop-blur p-6 text-left">
+                <div className="text-xs text-slate-500 font-mono uppercase tracking-widest mb-4 text-center">
+                  Global Top 10
+                </div>
+                {loading ? (
+                  <div className="text-center py-6 text-slate-600 font-mono text-sm animate-pulse">
+                    Loading...
+                  </div>
+                ) : (
+                  <Leaderboard entries={entries} />
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Footer */}
         <motion.p variants={item} className="mt-8 text-slate-600 text-xs font-mono">
