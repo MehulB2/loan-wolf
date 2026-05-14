@@ -48,11 +48,13 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   try {
     const q = query(
       collection(db, 'leaderboard'),
-      orderBy('score', 'desc'),
-      limit(10)
+      orderBy('round', 'desc'),
+      limit(100)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as LeaderboardEntry);
+    const entries = snapshot.docs.map(doc => doc.data() as LeaderboardEntry);
+    entries.sort((a, b) => b.round - a.round || b.score - a.score);
+    return entries.slice(0, 10);
   } catch (err) {
     console.error('Failed to fetch leaderboard:', err);
     return [];
