@@ -36,7 +36,7 @@ export default function StartScreen() {
   }, [showLeaderboard, entries.length]);
 
   return (
-    <div className="min-h-screen bg-[#0A0E1A] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0A0E1A] flex items-center justify-center px-4 py-8 relative overflow-hidden">
       {/* Animated background grid */}
       <div
         className="absolute inset-0 opacity-10"
@@ -142,7 +142,7 @@ export default function StartScreen() {
 
         {/* Footer */}
         <motion.p variants={item} className="mt-6 text-slate-600 text-xs font-mono">
-          30 rounds · Real credit risk mechanics · Firebase leaderboard
+          10–30 rounds · Real credit risk mechanics · Firebase leaderboard
         </motion.p>
 
         {/* Made by */}
