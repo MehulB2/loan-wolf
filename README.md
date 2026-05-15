@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Loan Wolf
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**[loanwolf.dev](https://loanwolf.dev)**
 
-Currently, two official plugins are available:
+A browser-based lending simulation game where you play as the head of a loan firm. Evaluate borrowers, set interest rates, manage portfolio risk, and try to survive without going bankrupt.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## How to Play
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Each round you're presented with borrowers — real names, credit scores, income, debt levels, employment history, and behavioral risk flags. You decide:
 
-## Expanding the ESLint configuration
+- **Swipe right** — approve the loan at the suggested rate
+- **Swipe up** — approve at a premium rate (+2.5%)
+- **Swipe left** — reject the borrower (costs reputation)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+After every borrower is processed the round resolves: each active loan either repays (you earn one month of interest) or defaults (you lose 45% of the principal). Economic events — recessions, rate hikes, sector crashes — fire randomly and shift default probabilities across your portfolio.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Run out of cash and you're bankrupt. Survive your chosen number of rounds and you win.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Game Modes
+
+| Mode | Rounds | Description |
+|------|--------|-------------|
+| Sprint | 10 | Fast session, forgiving curve |
+| Standard | 20 | Balanced challenge |
+| Marathon | 30 | Full difficulty ramp |
+
+All modes compete on the same global leaderboard, ranked by survival rate then score per round.
+
+---
+
+## Credit Risk Mechanics
+
+Borrower risk is modelled using real lending concepts:
+
+- **Probability of Default (PD)** — hidden value derived from credit score, DTI ratio, employment stability, and behavioral flags. Never shown directly; you infer it from visible signals.
+- **Loss Given Default (LGD)** — fixed at 45%. A defaulted loan costs you 45% of its principal.
+- **Expected Loss (EL)** — `PD × LGD`, used to set the suggested interest rate alongside a risk-band premium.
+- **Risk Bands** — Low / Medium / High / Very High, based on PD thresholds.
+- **Economic Events** — multipliers that shift PD up or down for affected industries. Events stack up to 3 simultaneously and grow more severe in later rounds.
+
+---
+
+## Tech Stack
+
+- **Frontend** — React, TypeScript, Vite
+- **Animations** — Framer Motion
+- **Charts** — Recharts
+- **State** — Zustand
+- **Leaderboard** — Firebase Firestore
+- **Styling** — Tailwind CSS
+
+---
+
+## Running Locally
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+To enable the leaderboard, create a `.env` file with your Firebase project credentials:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+---
+
+Made by [Mehul Bisht](https://github.com/MehulB2)
