@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '../hooks/useGameStore';
 import BorrowerCard from './BorrowerCard';
@@ -21,6 +22,17 @@ export default function CardStack() {
       rejectBorrower(topBorrower.id);
     }
   }
+
+  useEffect(() => {
+    if (phase !== 'playing' || !topBorrower) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') handleSwipe('right');
+      else if (e.key === 'ArrowLeft') handleSwipe('left');
+      else if (e.key === 'ArrowUp') handleSwipe('up');
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [phase, topBorrower]);
 
   if (phase === 'resolving') {
     return (
