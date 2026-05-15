@@ -20,6 +20,7 @@ const item: Variants = {
 
 export default function StartScreen() {
   const startGame = useGameStore(s => s.startGame);
+  const openLeaderboard = useGameStore(s => s.openLeaderboard);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -129,6 +130,16 @@ export default function StartScreen() {
             className="px-8 py-2.5 rounded-xl font-mono font-bold text-sm tracking-widest uppercase cursor-pointer border border-[#00D4FF]/30 bg-[#00D4FF]/10 text-[#00D4FF] hover:bg-[#00D4FF]/20 transition-colors"
           >
             {showLeaderboard ? 'HIDE LEADERBOARD' : '🏆 LEADERBOARD'}
+          </button>
+        </motion.div>
+
+        {/* Full leaderboard link */}
+        <motion.div variants={item} className="mt-3">
+          <button
+            onClick={openLeaderboard}
+            className="text-xs font-mono text-slate-500 hover:text-[#00D4FF] transition-colors tracking-widest uppercase cursor-pointer"
+          >
+            VIEW FULL LEADERBOARD →
           </button>
         </motion.div>
 

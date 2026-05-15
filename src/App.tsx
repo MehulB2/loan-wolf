@@ -3,6 +3,7 @@ import { useGameStore } from './hooks/useGameStore';
 import StartScreen from './components/StartScreen';
 import Dashboard from './components/Dashboard';
 import GameOver from './components/GameOver';
+import LeaderboardPage from './components/LeaderboardPage';
 
 function App() {
   const phase = useGameStore(s => s.phase);
@@ -12,6 +13,7 @@ function App() {
         {phase === 'start' && <StartScreen key="start" />}
         {(phase === 'playing' || phase === 'resolving') && <Dashboard key="dashboard" />}
         {phase === 'gameover' && <GameOver key="gameover" />}
+        {phase === 'leaderboard' && <LeaderboardPage key="leaderboard" />}
       </AnimatePresence>
     </div>
   );

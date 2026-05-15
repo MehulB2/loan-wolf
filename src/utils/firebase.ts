@@ -43,6 +43,24 @@ export async function submitScore(
   }
 }
 
+export async function getAllLeaderboard(): Promise<LeaderboardEntry[]> {
+  if (!db) return [];
+  try {
+    const q = query(
+      collection(db, 'leaderboard'),
+      orderBy('round', 'desc'),
+      limit(1000)
+    );
+    const snapshot = await getDocs(q);
+    const entries = snapshot.docs.map(doc => doc.data() as LeaderboardEntry);
+    entries.sort((a, b) => b.round - a.round || b.score - a.score);
+    return entries;
+  } catch (err) {
+    console.error('Failed to fetch full leaderboard:', err);
+    return [];
+  }
+}
+
 export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   if (!db) return [];
   try {

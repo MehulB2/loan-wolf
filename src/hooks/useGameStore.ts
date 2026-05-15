@@ -206,4 +206,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   resetGame: () => {
     set({ ...initialState, phase: 'start' });
   },
+
+  openLeaderboard: () => set({ phase: 'leaderboard' }),
+  closeLeaderboard: () => set({ phase: 'start' }),
 }));

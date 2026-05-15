@@ -2,7 +2,7 @@ import type { Borrower } from './borrower';
 import type { Loan, RoundOutcome } from './loan';
 import type { EconomicEvent } from './events';
 
-export type GamePhase = 'start' | 'playing' | 'resolving' | 'gameover';
+export type GamePhase = 'start' | 'playing' | 'resolving' | 'gameover' | 'leaderboard';
 export type GameResult = 'win' | 'bankrupt' | null;
 
 export interface RoundHistory {
@@ -34,4 +34,6 @@ export interface GameState {
   rejectBorrower: (borrowerId: string) => void;
   resolveRound: () => void;
   resetGame: () => void;
+  openLeaderboard: () => void;
+  closeLeaderboard: () => void;
 }
