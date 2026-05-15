@@ -11,6 +11,7 @@ import { formatCurrency } from '../utils/formatters';
 export default function Dashboard() {
   const lastRoundOutcomes = useGameStore(s => s.lastRoundOutcomes);
   const round = useGameStore(s => s.round);
+  const maxRounds = useGameStore(s => s.maxRounds);
   const phase = useGameStore(s => s.phase);
   const mobile = useGameStore(useShallow(s => ({
     cash: s.cash,
@@ -51,7 +52,7 @@ export default function Dashboard() {
           <div className={`px-2 py-1 rounded ${phase === 'resolving' ? 'bg-[#FFB800]/10 text-[#FFB800]' : 'bg-[#00FF9D]/10 text-[#00FF9D]'}`}>
             {phase === 'resolving' ? '⏳ RESOLVING' : '▶ PLAYING'}
           </div>
-          <span className="text-slate-400">Round <span className="text-[#00D4FF] font-bold">{round}</span> / 30</span>
+          <span className="text-slate-400">Round <span className="text-[#00D4FF] font-bold">{round}</span> / {maxRounds}</span>
         </div>
       </div>
 
