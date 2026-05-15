@@ -284,7 +284,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
         {/* Footer hint */}
         <div className="px-5 pb-3 pt-2 border-t border-[#1E2435]">
           <p className="text-xs text-slate-600 font-mono text-center">
-            {flipped ? 'Tap to flip back · Drag to decide' : 'Tap for details · Drag to decide'}
+            {flipped ? 'Tap to flip back · Swipe to decide' : 'Tap for details · Swipe to decide'}
           </p>
           <div className="flex justify-center gap-4 mt-2">
             <span className="text-xs font-mono text-[#FF3366]">← Reject</span>
