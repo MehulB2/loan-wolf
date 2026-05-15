@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '../hooks/useGameStore';
-import BorrowerCard, { type BorrowerCardRef } from './BorrowerCard';
+import BorrowerCard from './BorrowerCard';
 
 export default function CardStack() {
   const currentBorrowers = useGameStore(s => s.currentBorrowers);
@@ -12,45 +11,16 @@ export default function CardStack() {
   const visibleBorrowers = currentBorrowers.slice(0, 3);
   const topBorrower = visibleBorrowers[0];
 
-  const topCardRef = useRef<BorrowerCardRef>(null);
-  const processingKey = useRef(false);
-
-  // Always-current refs so the stable key listener never has stale closures
-  const topBorrowerRef = useRef(topBorrower);
-  topBorrowerRef.current = topBorrower;
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
-
-  // Called by drag swipes — card's own x/y already shows the animation
   function handleSwipe(direction: 'left' | 'right' | 'up') {
     if (!topBorrower) return;
-    if (direction === 'right') approveLoan(topBorrower.id, false);
-    else if (direction === 'up') approveLoan(topBorrower.id, true);
-    else rejectBorrower(topBorrower.id);
-  }
-
-  // Single stable listener registered once — reads live values via refs
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (phaseRef.current !== 'playing') return;
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowUp') return;
-      if (processingKey.current || !topBorrowerRef.current || !topCardRef.current) return;
-
-      const direction = e.key === 'ArrowRight' ? 'right' : e.key === 'ArrowLeft' ? 'left' : 'up';
-      const borrower = topBorrowerRef.current;
-
-      processingKey.current = true;
-      topCardRef.current.animateExit(direction).then(() => {
-        if (direction === 'right') approveLoan(borrower.id, false);
-        else if (direction === 'up') approveLoan(borrower.id, true);
-        else rejectBorrower(borrower.id);
-        processingKey.current = false;
-      });
+    if (direction === 'right') {
+      approveLoan(topBorrower.id, false);
+    } else if (direction === 'up') {
+      approveLoan(topBorrower.id, true);
+    } else {
+      rejectBorrower(topBorrower.id);
     }
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }
 
   if (phase === 'resolving') {
     return (
@@ -107,10 +77,14 @@ export default function CardStack() {
               className="absolute inset-0"
               initial={{ scale: 0.8, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              exit={{
+                x: index === 0 ? 0 : 0,
+                opacity: 0,
+                scale: 0.8,
+                transition: { duration: 0.3 },
+              }}
             >
               <BorrowerCard
-                ref={index === 0 ? topCardRef : null}
                 borrower={borrower}
                 onSwipe={handleSwipe}
                 isTop={index === 0}
