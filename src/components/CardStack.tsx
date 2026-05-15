@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '../hooks/useGameStore';
 import BorrowerCard from './BorrowerCard';
@@ -12,15 +12,15 @@ export default function CardStack() {
   const visibleBorrowers = currentBorrowers.slice(0, 3);
   const topBorrower = visibleBorrowers[0];
 
+  // Track exit direction so AnimatePresence exit animation flies the right way
+  const exitDir = useRef<'left' | 'right' | 'up'>('right');
+
   function handleSwipe(direction: 'left' | 'right' | 'up') {
     if (!topBorrower) return;
-    if (direction === 'right') {
-      approveLoan(topBorrower.id, false);
-    } else if (direction === 'up') {
-      approveLoan(topBorrower.id, true);
-    } else {
-      rejectBorrower(topBorrower.id);
-    }
+    exitDir.current = direction;
+    if (direction === 'right') approveLoan(topBorrower.id, false);
+    else if (direction === 'up') approveLoan(topBorrower.id, true);
+    else rejectBorrower(topBorrower.id);
   }
 
   useEffect(() => {
@@ -33,6 +33,19 @@ export default function CardStack() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [phase, topBorrower]);
+
+  function getExitAnimation(index: number) {
+    if (index !== 0) return { opacity: 0, scale: 0.8, transition: { duration: 0.3 } };
+    const dir = exitDir.current;
+    return {
+      x: dir === 'right' ? 500 : dir === 'left' ? -500 : 0,
+      y: dir === 'up' ? -500 : 0,
+      rotate: dir === 'right' ? 20 : dir === 'left' ? -20 : 0,
+      opacity: 0,
+      scale: 1,
+      transition: { duration: 0.35, ease: 'easeIn' as const },
+    };
+  }
 
   if (phase === 'resolving') {
     return (
@@ -89,12 +102,7 @@ export default function CardStack() {
               className="absolute inset-0"
               initial={{ scale: 0.8, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{
-                x: index === 0 ? 0 : 0,
-                opacity: 0,
-                scale: 0.8,
-                transition: { duration: 0.3 },
-              }}
+              exit={getExitAnimation(index)}
             >
               <BorrowerCard
                 borrower={borrower}
