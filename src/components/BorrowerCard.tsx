@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
+import { forwardRef, useImperativeHandle, useState, useRef } from 'react';
+import { motion, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion';
 import type { Borrower } from '../types/borrower';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 import { getCreditBand } from '../game/loanPricer';
@@ -9,6 +9,10 @@ interface Props {
   onSwipe: (direction: 'left' | 'right' | 'up') => void;
   isTop: boolean;
   stackIndex: number;
+}
+
+export interface BorrowerCardRef {
+  animateExit: (direction: 'left' | 'right' | 'up') => Promise<void>;
 }
 
 const FLAG_LABELS: Record<string, string> = {
@@ -36,7 +40,10 @@ function CreditScoreBadge({ score }: { score: number }) {
   );
 }
 
-export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: Props) {
+const BorrowerCard = forwardRef<BorrowerCardRef, Props>(function BorrowerCard(
+  { borrower, onSwipe, isTop, stackIndex },
+  ref
+) {
   const [flipped, setFlipped] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragStarted = useRef(false);
@@ -57,6 +64,18 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
   );
   const approveOpacity = useTransform(x, [50, 150], [0, 1]);
   const rejectOpacity = useTransform(x, [-150, -50], [1, 0]);
+
+  useImperativeHandle(ref, () => ({
+    async animateExit(direction: 'left' | 'right' | 'up') {
+      if (direction === 'right') {
+        await animate(x, 500, { duration: 0.3, ease: 'easeIn' });
+      } else if (direction === 'left') {
+        await animate(x, -500, { duration: 0.3, ease: 'easeIn' });
+      } else {
+        await animate(y, -500, { duration: 0.3, ease: 'easeIn' });
+      }
+    },
+  }));
 
   const dti = ((borrower.monthlyDebt * 12) / borrower.annualIncome) * 100;
   const band = getCreditBand(borrower.hiddenPD);
@@ -301,4 +320,6 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
       />
     </motion.div>
   );
-}
+});
+
+export default BorrowerCard;

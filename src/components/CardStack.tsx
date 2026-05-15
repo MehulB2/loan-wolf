@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '../hooks/useGameStore';
-import BorrowerCard from './BorrowerCard';
+import BorrowerCard, { type BorrowerCardRef } from './BorrowerCard';
 
 export default function CardStack() {
   const currentBorrowers = useGameStore(s => s.currentBorrowers);
@@ -12,40 +12,39 @@ export default function CardStack() {
   const visibleBorrowers = currentBorrowers.slice(0, 3);
   const topBorrower = visibleBorrowers[0];
 
-  // Track exit direction so AnimatePresence exit animation flies the right way
-  const exitDir = useRef<'left' | 'right' | 'up'>('right');
+  const topCardRef = useRef<BorrowerCardRef>(null);
+  const processingKey = useRef(false);
 
+  // Called by drag swipes — card's own x/y already shows the animation
   function handleSwipe(direction: 'left' | 'right' | 'up') {
     if (!topBorrower) return;
-    exitDir.current = direction;
     if (direction === 'right') approveLoan(topBorrower.id, false);
     else if (direction === 'up') approveLoan(topBorrower.id, true);
     else rejectBorrower(topBorrower.id);
   }
 
+  // Called by arrow keys — animate the card's internal motion values first
+  // so overlays show and card flies correctly, then commit the action
+  async function handleKeySwipe(direction: 'left' | 'right' | 'up') {
+    if (!topBorrower || processingKey.current || !topCardRef.current) return;
+    processingKey.current = true;
+    await topCardRef.current.animateExit(direction);
+    if (direction === 'right') approveLoan(topBorrower.id, false);
+    else if (direction === 'up') approveLoan(topBorrower.id, true);
+    else rejectBorrower(topBorrower.id);
+    processingKey.current = false;
+  }
+
   useEffect(() => {
     if (phase !== 'playing' || !topBorrower) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight') handleSwipe('right');
-      else if (e.key === 'ArrowLeft') handleSwipe('left');
-      else if (e.key === 'ArrowUp') handleSwipe('up');
+      if (e.key === 'ArrowRight') handleKeySwipe('right');
+      else if (e.key === 'ArrowLeft') handleKeySwipe('left');
+      else if (e.key === 'ArrowUp') handleKeySwipe('up');
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [phase, topBorrower]);
-
-  function getExitAnimation(index: number) {
-    if (index !== 0) return { opacity: 0, scale: 0.8, transition: { duration: 0.3 } };
-    const dir = exitDir.current;
-    return {
-      x: dir === 'right' ? 500 : dir === 'left' ? -500 : 0,
-      y: dir === 'up' ? -500 : 0,
-      rotate: dir === 'right' ? 20 : dir === 'left' ? -20 : 0,
-      opacity: 0,
-      scale: 1,
-      transition: { duration: 0.35, ease: 'easeIn' as const },
-    };
-  }
 
   if (phase === 'resolving') {
     return (
@@ -102,9 +101,10 @@ export default function CardStack() {
               className="absolute inset-0"
               initial={{ scale: 0.8, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={getExitAnimation(index)}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
             >
               <BorrowerCard
+                ref={index === 0 ? topCardRef : null}
                 borrower={borrower}
                 onSwipe={handleSwipe}
                 isTop={index === 0}
