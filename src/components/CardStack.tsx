@@ -15,6 +15,12 @@ export default function CardStack() {
   const topCardRef = useRef<BorrowerCardRef>(null);
   const processingKey = useRef(false);
 
+  // Always-current refs so the stable key listener never has stale closures
+  const topBorrowerRef = useRef(topBorrower);
+  topBorrowerRef.current = topBorrower;
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+
   // Called by drag swipes — card's own x/y already shows the animation
   function handleSwipe(direction: 'left' | 'right' | 'up') {
     if (!topBorrower) return;
@@ -23,28 +29,28 @@ export default function CardStack() {
     else rejectBorrower(topBorrower.id);
   }
 
-  // Called by arrow keys — animate the card's internal motion values first
-  // so overlays show and card flies correctly, then commit the action
-  async function handleKeySwipe(direction: 'left' | 'right' | 'up') {
-    if (!topBorrower || processingKey.current || !topCardRef.current) return;
-    processingKey.current = true;
-    await topCardRef.current.animateExit(direction);
-    if (direction === 'right') approveLoan(topBorrower.id, false);
-    else if (direction === 'up') approveLoan(topBorrower.id, true);
-    else rejectBorrower(topBorrower.id);
-    processingKey.current = false;
-  }
-
+  // Single stable listener registered once — reads live values via refs
   useEffect(() => {
-    if (phase !== 'playing' || !topBorrower) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight') handleKeySwipe('right');
-      else if (e.key === 'ArrowLeft') handleKeySwipe('left');
-      else if (e.key === 'ArrowUp') handleKeySwipe('up');
+      if (phaseRef.current !== 'playing') return;
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowUp') return;
+      if (processingKey.current || !topBorrowerRef.current || !topCardRef.current) return;
+
+      const direction = e.key === 'ArrowRight' ? 'right' : e.key === 'ArrowLeft' ? 'left' : 'up';
+      const borrower = topBorrowerRef.current;
+
+      processingKey.current = true;
+      topCardRef.current.animateExit(direction).then(() => {
+        if (direction === 'right') approveLoan(borrower.id, false);
+        else if (direction === 'up') approveLoan(borrower.id, true);
+        else rejectBorrower(borrower.id);
+        processingKey.current = false;
+      });
     }
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [phase, topBorrower]);
+  }, []);
 
   if (phase === 'resolving') {
     return (
