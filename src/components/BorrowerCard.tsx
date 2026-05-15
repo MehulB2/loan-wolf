@@ -172,9 +172,12 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
             </div>
             <CreditScoreBadge score={borrower.creditScore} />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-mono font-bold text-[#00D4FF]">{formatCurrency(borrower.loanAmount)}</span>
-            <span className="text-xs text-slate-500 font-mono">· {borrower.loanPurpose}</span>
+          <div>
+            <div className="text-xs text-slate-500 font-mono mb-0.5">Loan Request</div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-mono font-bold text-[#00D4FF]">{formatCurrency(borrower.loanAmount)}</span>
+              <span className="text-xs text-slate-500 font-mono">· {borrower.loanPurpose}</span>
+            </div>
           </div>
         </div>
 
