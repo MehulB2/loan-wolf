@@ -21,6 +21,7 @@ const item: Variants = {
 export default function StartScreen() {
   const startGame = useGameStore(s => s.startGame);
   const openLeaderboard = useGameStore(s => s.openLeaderboard);
+  const [selectedMode, setSelectedMode] = useState<10 | 20 | 30>(20);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,10 +99,36 @@ export default function StartScreen() {
           ))}
         </motion.div>
 
+        {/* Mode selector */}
+        <motion.div variants={item} className="flex gap-3 justify-center mb-6">
+          {([
+            { mode: 10 as const, label: 'Sprint', rounds: '10 rounds' },
+            { mode: 20 as const, label: 'Standard', rounds: '20 rounds' },
+            { mode: 30 as const, label: 'Marathon', rounds: '30 rounds' },
+          ]).map(({ mode, label, rounds }) => {
+            const active = selectedMode === mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => setSelectedMode(mode)}
+                className="flex-1 py-3 rounded-xl font-mono text-sm font-bold tracking-wide cursor-pointer transition-all border"
+                style={{
+                  borderColor: active ? '#00D4FF' : '#1E2435',
+                  background: active ? 'rgba(0,212,255,0.1)' : '#141824',
+                  color: active ? '#00D4FF' : '#64748b',
+                }}
+              >
+                <div>{label}</div>
+                <div className="text-xs font-normal opacity-70 mt-0.5">{rounds}</div>
+              </button>
+            );
+          })}
+        </motion.div>
+
         {/* Start Button */}
         <motion.button
           variants={item}
-          onClick={startGame}
+          onClick={() => startGame(selectedMode)}
           className="px-12 py-4 rounded-xl font-mono font-bold text-lg tracking-widest uppercase cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #00D4FF, #00FF9D)',

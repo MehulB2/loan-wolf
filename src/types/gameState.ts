@@ -29,7 +29,7 @@ export interface GameState {
   lastRoundOutcomes: RoundOutcome[];
   score: number;
 
-  startGame: () => void;
+  startGame: (mode: 10 | 20 | 30) => void;
   approveLoan: (borrowerId: string, premium: boolean) => void;
   rejectBorrower: (borrowerId: string) => void;
   resolveRound: () => void;

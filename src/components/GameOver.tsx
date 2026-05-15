@@ -35,7 +35,7 @@ export default function GameOver() {
     if (!playerName.trim()) return;
     setSubmitting(true);
     try {
-      await submitScore(playerName.trim(), state.score, state.round, defaultRate);
+      await submitScore(playerName.trim(), state.score, state.round, state.maxRounds, defaultRate);
       const entries = await getLeaderboard();
       setLeaderboard(entries);
       setSubmitted(true);

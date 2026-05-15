@@ -27,12 +27,13 @@ const initialState = {
 export const useGameStore = create<GameState>((set, get) => ({
   ...initialState,
 
-  startGame: () => {
+  startGame: (mode: 10 | 20 | 30) => {
     const events: never[] = [];
     const borrowers = generateBorrowers(BORROWERS_PER_ROUND, 1, events);
     set({
       ...initialState,
       phase: 'playing',
+      maxRounds: mode,
       currentBorrowers: borrowers,
       activeEvents: [],
       activeLoans: [],

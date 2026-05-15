@@ -14,6 +14,7 @@ export interface LeaderboardEntry {
   name: string;
   score: number;
   round: number;
+  maxRounds: number;
   defaultRate: number;
   timestamp: number;
 }
@@ -23,10 +24,29 @@ const isConfigured = !!firebaseConfig.projectId;
 const app = isConfigured ? initializeApp(firebaseConfig) : null;
 export const db = app ? getFirestore(app) : null;
 
+function survivalRate(entry: LeaderboardEntry): number {
+  const max = entry.maxRounds || 30;
+  return entry.round / max;
+}
+
+function scorePerRound(entry: LeaderboardEntry): number {
+  const max = entry.maxRounds || 30;
+  return entry.score / max;
+}
+
+function sortEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {
+  return entries.sort((a, b) => {
+    const rateDiff = survivalRate(b) - survivalRate(a);
+    if (rateDiff !== 0) return rateDiff;
+    return scorePerRound(b) - scorePerRound(a);
+  });
+}
+
 export async function submitScore(
   name: string,
   score: number,
   round: number,
+  maxRounds: number,
   defaultRate: number
 ): Promise<void> {
   if (!db) return;
@@ -35,6 +55,7 @@ export async function submitScore(
       name,
       score,
       round,
+      maxRounds,
       defaultRate,
       timestamp: Date.now(),
     });
@@ -53,8 +74,7 @@ export async function getAllLeaderboard(): Promise<LeaderboardEntry[]> {
     );
     const snapshot = await getDocs(q);
     const entries = snapshot.docs.map(doc => doc.data() as LeaderboardEntry);
-    entries.sort((a, b) => b.round - a.round || b.score - a.score);
-    return entries;
+    return sortEntries(entries);
   } catch (err) {
     console.error('Failed to fetch full leaderboard:', err);
     return [];
@@ -71,8 +91,7 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     );
     const snapshot = await getDocs(q);
     const entries = snapshot.docs.map(doc => doc.data() as LeaderboardEntry);
-    entries.sort((a, b) => b.round - a.round || b.score - a.score);
-    return entries.slice(0, 10);
+    return sortEntries(entries).slice(0, 10);
   } catch (err) {
     console.error('Failed to fetch leaderboard:', err);
     return [];

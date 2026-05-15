@@ -6,6 +6,20 @@ import { formatPercent } from '../utils/formatters';
 
 const PAGE_SIZE = 25;
 
+function ModeBadge({ maxRounds }: { maxRounds?: number }) {
+  const mode = maxRounds || 30;
+  const label = mode === 10 ? 'S' : mode === 20 ? 'M' : 'L';
+  const color = mode === 10 ? '#00D4FF' : mode === 20 ? '#FFB800' : '#00FF9D';
+  return (
+    <span
+      className="text-[10px] font-mono font-bold px-1 py-0.5 rounded border"
+      style={{ color, borderColor: color, background: `${color}15` }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function LeaderboardPage() {
   const closeLeaderboard = useGameStore(s => s.closeLeaderboard);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -61,9 +75,10 @@ export default function LeaderboardPage() {
         {/* Table */}
         <div className="rounded-2xl border border-[#1E2435] bg-[#141824] overflow-hidden">
           {/* Column headers */}
-          <div className="grid grid-cols-7 gap-2 px-4 py-3 text-xs text-slate-500 uppercase tracking-wider border-b border-[#1E2435]">
+          <div className="grid grid-cols-8 gap-2 px-4 py-3 text-xs text-slate-500 uppercase tracking-wider border-b border-[#1E2435]">
             <span>#</span>
             <span className="col-span-2">Name</span>
+            <span className="text-center">Mode</span>
             <span className="text-right">Round</span>
             <span className="text-right col-span-2">Score</span>
             <span className="text-right">Default%</span>
@@ -81,18 +96,22 @@ export default function LeaderboardPage() {
             <div>
               {pageEntries.map((entry, i) => {
                 const rank = page * PAGE_SIZE + i;
-                const survived = entry.round >= 30;
+                const max = entry.maxRounds || 30;
+                const survived = entry.round >= max;
                 return (
                   <div
                     key={`${entry.name}-${entry.timestamp}`}
-                    className="grid grid-cols-7 gap-2 px-4 py-3 border-b border-[#1E2435]/50 last:border-0 hover:bg-[#1E2435]/30 transition-colors text-sm"
+                    className="grid grid-cols-8 gap-2 px-4 py-3 border-b border-[#1E2435]/50 last:border-0 hover:bg-[#1E2435]/30 transition-colors text-sm"
                   >
                     <span className={`font-bold ${rank === 0 ? 'text-[#FFB800]' : rank === 1 ? 'text-slate-300' : rank === 2 ? 'text-[#FB923C]' : 'text-slate-500'}`}>
                       {rank + 1}
                     </span>
                     <span className="col-span-2 truncate text-slate-200">{entry.name}</span>
+                    <span className="flex items-center justify-center">
+                      <ModeBadge maxRounds={entry.maxRounds} />
+                    </span>
                     <span className={`text-right text-xs font-bold ${survived ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
-                      {entry.round}/30
+                      {entry.round}/{max}
                     </span>
                     <span className={`text-right col-span-2 font-bold ${survived ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
                       {Math.round(entry.score).toLocaleString()}

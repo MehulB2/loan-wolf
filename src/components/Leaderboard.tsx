@@ -6,6 +6,20 @@ interface Props {
   currentPlayerName?: string;
 }
 
+function ModeBadge({ maxRounds }: { maxRounds?: number }) {
+  const mode = maxRounds || 30;
+  const label = mode === 10 ? 'S' : mode === 20 ? 'M' : 'L';
+  const color = mode === 10 ? '#00D4FF' : mode === 20 ? '#FFB800' : '#00FF9D';
+  return (
+    <span
+      className="text-[10px] font-mono font-bold px-1 py-0.5 rounded border"
+      style={{ color, borderColor: color, background: `${color}15` }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function Leaderboard({ entries, currentPlayerName }: Props) {
   if (entries.length === 0) {
     return (
@@ -17,20 +31,22 @@ export default function Leaderboard({ entries, currentPlayerName }: Props) {
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-7 gap-2 px-3 py-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
+      <div className="grid grid-cols-8 gap-2 px-3 py-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
         <span>#</span>
         <span className="col-span-2">Name</span>
+        <span className="text-center">Mode</span>
         <span className="text-right">Round</span>
         <span className="text-right col-span-2">Score</span>
         <span className="text-right">Default%</span>
       </div>
       {entries.map((entry, index) => {
         const isCurrentPlayer = entry.name === currentPlayerName;
-        const survived = entry.round >= 30;
+        const max = entry.maxRounds || 30;
+        const survived = entry.round >= max;
         return (
           <div
             key={index}
-            className={`grid grid-cols-7 gap-2 px-3 py-2 rounded-lg font-mono text-sm transition-colors ${
+            className={`grid grid-cols-8 gap-2 px-3 py-2 rounded-lg font-mono text-sm transition-colors ${
               isCurrentPlayer
                 ? 'bg-[#00D4FF]/10 border border-[#00D4FF]/30'
                 : 'bg-[#141824] border border-[#1E2435]'
@@ -43,8 +59,11 @@ export default function Leaderboard({ entries, currentPlayerName }: Props) {
               {entry.name}
               {isCurrentPlayer && <span className="text-xs ml-1 opacity-70">(you)</span>}
             </span>
+            <span className="flex items-center justify-center">
+              <ModeBadge maxRounds={entry.maxRounds} />
+            </span>
             <span className={`text-right text-xs font-bold ${survived ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
-              {entry.round}/30
+              {entry.round}/{max}
             </span>
             <span className={`text-right col-span-2 font-bold ${survived ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
               {Math.round(entry.score).toLocaleString()}
