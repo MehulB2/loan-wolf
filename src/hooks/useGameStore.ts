@@ -5,6 +5,7 @@ import { STARTING_CASH, MAX_ROUNDS, BORROWERS_PER_ROUND, PREMIUM_BONUS, BANKRUPT
 import { generateBorrowers } from '../game/borrowerGenerator';
 import { resolveLoans } from '../game/defaultEngine';
 import { maybeSpawnEvent } from '../game/economicEvents';
+import { upsertScore } from '../utils/firebase';
 
 const initialState = {
   phase: 'start' as GamePhase,
@@ -22,6 +23,8 @@ const initialState = {
   roundHistory: [] as RoundHistory[],
   lastRoundOutcomes: [],
   score: 0,
+  playerName: '',
+  gameId: null as string | null,
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -30,6 +33,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   startGame: (mode: 10 | 20 | 30) => {
     const events: never[] = [];
     const borrowers = generateBorrowers(BORROWERS_PER_ROUND, 1, events);
+    const gameId = crypto.randomUUID();
+    const { playerName } = get();
     set({
       ...initialState,
       phase: 'playing',
@@ -46,7 +51,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       round: 1,
       score: 0,
       result: null,
+      playerName,
+      gameId,
     });
+    upsertScore(gameId, playerName, 0, 1, mode, 0);
   },
 
   approveLoan: (borrowerId: string, premium: boolean) => {
@@ -148,6 +156,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const newScore = newTotalProfit + newRep * 1000;
 
+      const { gameId, playerName } = currentState;
+
       // Check game end conditions
       if (newCash <= BANKRUPTCY_THRESHOLD) {
         set({
@@ -163,6 +173,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           lastRoundOutcomes: outcomes,
           score: newScore,
         });
+        if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         return;
       }
 
@@ -180,6 +191,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           lastRoundOutcomes: outcomes,
           score: newScore,
         });
+        if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         return;
       }
 
@@ -201,13 +213,16 @@ export const useGameStore = create<GameState>((set, get) => ({
         lastRoundOutcomes: outcomes,
         score: newScore,
       });
+      if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
     }, 1500);
   },
 
   resetGame: () => {
-    set({ ...initialState, phase: 'start' });
+    const { playerName } = get();
+    set({ ...initialState, phase: 'start', playerName, gameId: null });
   },
 
   openLeaderboard: () => set({ phase: 'leaderboard' }),
   closeLeaderboard: () => set({ phase: 'start' }),
+  setPlayerName: (name: string) => set({ playerName: name }),
 }));

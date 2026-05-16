@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, orderBy, limit, setDoc, doc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -42,7 +42,8 @@ function sortEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {
   });
 }
 
-export async function submitScore(
+export async function upsertScore(
+  gameId: string,
   name: string,
   score: number,
   round: number,
@@ -51,7 +52,7 @@ export async function submitScore(
 ): Promise<void> {
   if (!db) return;
   try {
-    await addDoc(collection(db, 'leaderboard'), {
+    await setDoc(doc(db, 'leaderboard', gameId), {
       name,
       score,
       round,
@@ -60,7 +61,7 @@ export async function submitScore(
       timestamp: Date.now(),
     });
   } catch (err) {
-    console.error('Failed to submit score:', err);
+    console.error('Failed to upsert score:', err);
   }
 }
 

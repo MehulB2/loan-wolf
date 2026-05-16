@@ -21,6 +21,8 @@ const item: Variants = {
 export default function StartScreen() {
   const startGame = useGameStore(s => s.startGame);
   const openLeaderboard = useGameStore(s => s.openLeaderboard);
+  const playerName = useGameStore(s => s.playerName);
+  const setPlayerName = useGameStore(s => s.setPlayerName);
   const [selectedMode, setSelectedMode] = useState<10 | 20 | 30>(20);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -74,9 +76,22 @@ export default function StartScreen() {
         </motion.h1>
 
         {/* Tagline */}
-        <motion.p variants={item} className="text-slate-400 text-lg mb-10 font-mono">
+        <motion.p variants={item} className="text-slate-400 text-lg mb-6 font-mono">
           Run a lending firm. Approve the right borrowers. Don't go bankrupt.
         </motion.p>
+
+        {/* Username input */}
+        <motion.div variants={item} className="mb-10">
+          <input
+            type="text"
+            value={playerName}
+            onChange={e => setPlayerName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && playerName.trim() && startGame(selectedMode)}
+            placeholder="Enter your username..."
+            maxLength={20}
+            className="w-full bg-[#141824] border border-[#1E2435] rounded-xl px-5 py-3 text-slate-200 font-mono text-base placeholder-slate-600 focus:outline-none focus:border-[#00D4FF]/50 text-center"
+          />
+        </motion.div>
 
         {/* Mechanics */}
         <motion.div
@@ -129,13 +144,14 @@ export default function StartScreen() {
         <motion.button
           variants={item}
           onClick={() => startGame(selectedMode)}
-          className="px-12 py-4 rounded-xl font-mono font-bold text-lg tracking-widest uppercase cursor-pointer"
+          disabled={!playerName.trim()}
+          className="px-12 py-4 rounded-xl font-mono font-bold text-lg tracking-widest uppercase transition-opacity disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #00D4FF, #00FF9D)',
             color: '#0A0E1A',
           }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={playerName.trim() ? { scale: 1.05 } : {}}
+          whileTap={playerName.trim() ? { scale: 0.97 } : {}}
         >
           START GAME
         </motion.button>

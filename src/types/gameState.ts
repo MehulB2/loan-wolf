@@ -28,6 +28,8 @@ export interface GameState {
   roundHistory: RoundHistory[];
   lastRoundOutcomes: RoundOutcome[];
   score: number;
+  playerName: string;
+  gameId: string | null;
 
   startGame: (mode: 10 | 20 | 30) => void;
   approveLoan: (borrowerId: string, premium: boolean) => void;
@@ -36,4 +38,5 @@ export interface GameState {
   resetGame: () => void;
   openLeaderboard: () => void;
   closeLeaderboard: () => void;
+  setPlayerName: (name: string) => void;
 }

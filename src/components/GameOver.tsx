@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '../hooks/useGameStore';
 import { formatCurrency, formatPercent } from '../utils/formatters';
-import { submitScore, getLeaderboard, type LeaderboardEntry } from '../utils/firebase';
+import { getLeaderboard, type LeaderboardEntry } from '../utils/firebase';
 import Leaderboard from './Leaderboard';
 
 export default function GameOver() {
@@ -16,14 +16,12 @@ export default function GameOver() {
     reputation: s.reputation,
     loanHistory: s.loanHistory,
     score: s.score,
+    playerName: s.playerName,
   })));
   const resetGame = useGameStore(s => s.resetGame);
 
-  const [playerName, setPlayerName] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   const isWin = state.result === 'win';
 
@@ -31,22 +29,12 @@ export default function GameOver() {
   const defaultedLoans = state.loanHistory.filter(l => l.status === 'defaulted').length;
   const defaultRate = totalLoans > 0 ? defaultedLoans / totalLoans : 0;
 
-  async function handleSubmit() {
-    if (!playerName.trim()) return;
-    setSubmitting(true);
-    try {
-      await submitScore(playerName.trim(), state.score, state.round, state.maxRounds, defaultRate);
-      const entries = await getLeaderboard();
+  useEffect(() => {
+    getLeaderboard().then(entries => {
       setLeaderboard(entries);
-      setSubmitted(true);
-      setShowLeaderboard(true);
-    } catch {
-      // Firebase not configured — still show play again
-      setSubmitted(true);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+      setLoadingLeaderboard(false);
+    });
+  }, []);
 
   const themeColor = isWin ? '#00FF9D' : '#FF3366';
   const themeBg = isWin ? 'rgba(0,255,157,0.05)' : 'rgba(255,51,102,0.05)';
@@ -113,55 +101,22 @@ export default function GameOver() {
             <div className="text-4xl font-mono font-black text-[#FFB800]">
               {Math.round(state.score).toLocaleString()}
             </div>
+            <div className="text-xs text-slate-600 font-mono mt-1">
+              Submitted as <span className="text-slate-400">{state.playerName}</span>
+            </div>
           </div>
 
-          {/* Leaderboard submission */}
-          {!submitted ? (
-            <div className="space-y-3 mb-6">
-              <div className="text-xs text-slate-500 font-mono uppercase tracking-widest text-center">Submit to Leaderboard</div>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={e => setPlayerName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                  placeholder="Enter your name..."
-                  maxLength={20}
-                  className="flex-1 bg-[#0A0E1A] border border-[#1E2435] rounded-lg px-4 py-2 text-slate-200 font-mono text-sm placeholder-slate-600 focus:outline-none focus:border-[#00D4FF]/50"
-                />
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting || !playerName.trim()}
-                  className="px-6 py-2 rounded-lg font-mono font-bold text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  style={{ background: themeColor, color: '#0A0E1A' }}
-                >
-                  {submitting ? '...' : 'Submit'}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center mb-4">
-              <span className="text-xs font-mono text-[#00FF9D]">Score submitted!</span>
-              <button
-                onClick={() => setShowLeaderboard(s => !s)}
-                className="ml-3 text-xs font-mono text-[#00D4FF] underline cursor-pointer"
-              >
-                {showLeaderboard ? 'Hide' : 'Show'} leaderboard
-              </button>
-            </div>
-          )}
-
           {/* Leaderboard */}
-          {showLeaderboard && leaderboard.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mb-6"
-            >
-              <div className="text-xs text-slate-500 font-mono uppercase tracking-widest mb-3 text-center">Top Players</div>
-              <Leaderboard entries={leaderboard} currentPlayerName={playerName} />
-            </motion.div>
-          )}
+          <div className="mb-6">
+            <div className="text-xs text-slate-500 font-mono uppercase tracking-widest mb-3 text-center">Top Players</div>
+            {loadingLeaderboard ? (
+              <div className="text-center py-6 text-slate-600 font-mono text-sm animate-pulse">
+                Loading leaderboard...
+              </div>
+            ) : (
+              <Leaderboard entries={leaderboard} currentPlayerName={state.playerName} />
+            )}
+          </div>
 
           {/* Play again */}
           <button
