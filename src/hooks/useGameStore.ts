@@ -109,7 +109,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ phase: 'resolving' });
 
     // Use setTimeout to allow UI to show resolving state
-    setTimeout(() => {
+    setTimeout(async () => {
       const currentState = get();
       const { updatedLoans, outcomes, cashDelta } = resolveLoans(
         currentState.activeLoans,
@@ -158,8 +158,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const { gameId, playerName } = currentState;
 
-      // Check game end conditions
+      // Check game end conditions — await upsert before transitioning so the
+      // leaderboard fetch in GameOver sees the final score immediately.
       if (newCash <= BANKRUPTCY_THRESHOLD) {
+        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'bankrupt',
@@ -173,11 +175,11 @@ export const useGameStore = create<GameState>((set, get) => ({
           lastRoundOutcomes: outcomes,
           score: newScore,
         });
-        if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         return;
       }
 
       if (currentState.round >= currentState.maxRounds) {
+        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'win',
@@ -191,11 +193,10 @@ export const useGameStore = create<GameState>((set, get) => ({
           lastRoundOutcomes: outcomes,
           score: newScore,
         });
-        if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         return;
       }
 
-      // Advance to next round
+      // Advance to next round — fire-and-forget is fine for mid-game updates
       const nextRound = currentState.round + 1;
       const newBorrowers = generateBorrowers(BORROWERS_PER_ROUND, nextRound, newActiveEvents);
 
