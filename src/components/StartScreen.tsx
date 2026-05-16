@@ -27,6 +27,16 @@ export default function StartScreen() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [shaking, setShaking] = useState(false);
+
+  function handleStartGame() {
+    if (!playerName.trim()) {
+      setShaking(true);
+      setTimeout(() => setShaking(false), 500);
+      return;
+    }
+    startGame(selectedMode);
+  }
 
   useEffect(() => {
     if (!showLeaderboard || entries.length > 0) return;
@@ -82,13 +92,18 @@ export default function StartScreen() {
 
         {/* Username input */}
         <motion.div variants={item} className="mb-10">
-          <input
+          <motion.input
             type="text"
             value={playerName}
             onChange={e => setPlayerName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && playerName.trim() && startGame(selectedMode)}
+            onKeyDown={e => e.key === 'Enter' && handleStartGame()}
             placeholder="Enter your username..."
             maxLength={20}
+            animate={shaking
+              ? { x: [-10, 10, -8, 8, -5, 5, 0], borderColor: ['#FF3366', '#FF3366', '#FF3366', '#FF3366', '#FF3366', '#FF3366', '#1E2435'] }
+              : { x: 0 }
+            }
+            transition={{ duration: 0.45 }}
             className="w-full bg-[#141824] border border-[#1E2435] rounded-xl px-5 py-3 text-slate-200 font-mono text-base placeholder-slate-600 focus:outline-none focus:border-[#00D4FF]/50 text-center"
           />
         </motion.div>
@@ -143,15 +158,15 @@ export default function StartScreen() {
         {/* Start Button */}
         <motion.button
           variants={item}
-          onClick={() => startGame(selectedMode)}
-          disabled={!playerName.trim()}
-          className="px-12 py-4 rounded-xl font-mono font-bold text-lg tracking-widest uppercase transition-opacity disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          onClick={handleStartGame}
+          className="px-12 py-4 rounded-xl font-mono font-bold text-lg tracking-widest uppercase cursor-pointer transition-opacity"
           style={{
             background: 'linear-gradient(135deg, #00D4FF, #00FF9D)',
             color: '#0A0E1A',
+            opacity: playerName.trim() ? 1 : 0.4,
           }}
-          whileHover={playerName.trim() ? { scale: 1.05 } : {}}
-          whileTap={playerName.trim() ? { scale: 0.97 } : {}}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
         >
           START GAME
         </motion.button>
