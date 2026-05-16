@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, setDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, deleteDoc, doc, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -42,29 +42,50 @@ function sortEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {
   });
 }
 
-export async function upsertScore(
-  gameId: string,
+// Creates a placeholder entry when the game starts. Returns the Firestore doc ID
+// so we can delete it when the game ends.
+export async function createInitialEntry(name: string, maxRounds: number): Promise<string | null> {
+  if (!db) return null;
+  try {
+    const ref = await addDoc(collection(db, 'leaderboard'), {
+      name,
+      score: 0,
+      round: 1,
+      maxRounds,
+      defaultRate: 0,
+      timestamp: Date.now(),
+    });
+    return ref.id;
+  } catch (err) {
+    console.error('Failed to create initial entry:', err);
+    return null;
+  }
+}
+
+// Deletes the placeholder entry (if any) then writes the final authoritative score.
+export async function replaceFinalScore(
+  initialDocId: string | null,
   name: string,
   score: number,
   round: number,
   maxRounds: number,
-  defaultRate: number,
-  isFinal = false
+  defaultRate: number
 ): Promise<void> {
   if (!db) return;
   const data = { name, score, round, maxRounds, defaultRate, timestamp: Date.now() };
-  try {
-    await setDoc(doc(db, 'leaderboard', gameId), data);
-  } catch {
-    // setDoc failed (likely Firestore rules block updates on existing docs).
-    // For final submissions, fall back to addDoc so the score always lands.
-    if (isFinal) {
-      try {
-        await addDoc(collection(db, 'leaderboard'), data);
-      } catch (err) {
-        console.error('Failed to submit final score:', err);
-      }
+
+  if (initialDocId) {
+    try {
+      await deleteDoc(doc(db, 'leaderboard', initialDocId));
+    } catch {
+      // Delete blocked by rules — the placeholder stays, but we still write the final entry.
     }
+  }
+
+  try {
+    await addDoc(collection(db, 'leaderboard'), data);
+  } catch (err) {
+    console.error('Failed to submit final score:', err);
   }
 }
 

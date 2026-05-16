@@ -5,7 +5,7 @@ import { STARTING_CASH, MAX_ROUNDS, BORROWERS_PER_ROUND, PREMIUM_BONUS, BANKRUPT
 import { generateBorrowers } from '../game/borrowerGenerator';
 import { resolveLoans } from '../game/defaultEngine';
 import { maybeSpawnEvent } from '../game/economicEvents';
-import { upsertScore } from '../utils/firebase';
+import { createInitialEntry, replaceFinalScore } from '../utils/firebase';
 
 const initialState = {
   phase: 'start' as GamePhase,
@@ -33,7 +33,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   startGame: (mode: 10 | 20 | 30) => {
     const events: never[] = [];
     const borrowers = generateBorrowers(BORROWERS_PER_ROUND, 1, events);
-    const gameId = crypto.randomUUID();
     const { playerName } = get();
     set({
       ...initialState,
@@ -52,7 +51,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       score: 0,
       result: null,
       playerName,
-      gameId,
+      gameId: null,
+    });
+    // Create placeholder entry; store its doc ID so we can delete it at game end
+    createInitialEntry(playerName, mode).then(docId => {
+      const s = get();
+      if (s.phase !== 'start' && s.playerName === playerName) {
+        set({ gameId: docId });
+      }
     });
   },
 
@@ -160,7 +166,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       // Check game end conditions — await upsert before transitioning so the
       // leaderboard fetch in GameOver sees the final score immediately.
       if (newCash <= BANKRUPTCY_THRESHOLD) {
-        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate, true);
+        await replaceFinalScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'bankrupt',
@@ -178,7 +184,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
 
       if (currentState.round >= currentState.maxRounds) {
-        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate, true);
+        await replaceFinalScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'win',
@@ -195,7 +201,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         return;
       }
 
-      // Advance to next round — fire-and-forget is fine for mid-game updates
+      // Advance to next round
       const nextRound = currentState.round + 1;
       const newBorrowers = generateBorrowers(BORROWERS_PER_ROUND, nextRound, newActiveEvents);
 
@@ -213,7 +219,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         lastRoundOutcomes: outcomes,
         score: newScore,
       });
-      if (gameId) upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
     }, 1500);
   },
 
