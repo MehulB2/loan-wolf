@@ -29,7 +29,6 @@ export interface GameState {
   lastRoundOutcomes: RoundOutcome[];
   score: number;
   playerName: string;
-  gameId: string | null;
 
   startGame: (mode: 10 | 20 | 30) => void;
   approveLoan: (borrowerId: string, premium: boolean) => void;

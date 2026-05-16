@@ -5,7 +5,7 @@ import { STARTING_CASH, MAX_ROUNDS, BORROWERS_PER_ROUND, PREMIUM_BONUS, BANKRUPT
 import { generateBorrowers } from '../game/borrowerGenerator';
 import { resolveLoans } from '../game/defaultEngine';
 import { maybeSpawnEvent } from '../game/economicEvents';
-import { createInitialEntry, replaceFinalScore } from '../utils/firebase';
+import { submitFinalScore } from '../utils/firebase';
 
 const initialState = {
   phase: 'start' as GamePhase,
@@ -24,7 +24,6 @@ const initialState = {
   lastRoundOutcomes: [],
   score: 0,
   playerName: '',
-  gameId: null as string | null,
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -51,14 +50,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       score: 0,
       result: null,
       playerName,
-      gameId: null,
-    });
-    // Create placeholder entry; store its doc ID so we can delete it at game end
-    createInitialEntry(playerName, mode).then(docId => {
-      const s = get();
-      if (s.phase !== 'start' && s.playerName === playerName) {
-        set({ gameId: docId });
-      }
     });
   },
 
@@ -161,12 +152,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const newScore = newTotalProfit + newRep * 1000;
 
-      const { gameId, playerName } = currentState;
+      const { playerName } = currentState;
 
-      // Check game end conditions — await upsert before transitioning so the
-      // leaderboard fetch in GameOver sees the final score immediately.
       if (newCash <= BANKRUPTCY_THRESHOLD) {
-        await replaceFinalScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
+        await submitFinalScore(playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'bankrupt',
@@ -184,7 +173,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
 
       if (currentState.round >= currentState.maxRounds) {
-        await replaceFinalScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
+        await submitFinalScore(playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
         set({
           phase: 'gameover',
           result: 'win',
@@ -224,7 +213,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   resetGame: () => {
     const { playerName } = get();
-    set({ ...initialState, phase: 'start', playerName, gameId: null });
+    set({ ...initialState, phase: 'start', playerName });
   },
 
   openLeaderboard: () => set({ phase: 'leaderboard' }),

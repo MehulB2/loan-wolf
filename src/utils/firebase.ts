@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, deleteDoc, doc, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -42,29 +42,7 @@ function sortEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {
   });
 }
 
-// Creates a placeholder entry when the game starts. Returns the Firestore doc ID
-// so we can delete it when the game ends.
-export async function createInitialEntry(name: string, maxRounds: number): Promise<string | null> {
-  if (!db) return null;
-  try {
-    const ref = await addDoc(collection(db, 'leaderboard'), {
-      name,
-      score: 0,
-      round: 1,
-      maxRounds,
-      defaultRate: 0,
-      timestamp: Date.now(),
-    });
-    return ref.id;
-  } catch (err) {
-    console.error('Failed to create initial entry:', err);
-    return null;
-  }
-}
-
-// Deletes the placeholder entry (if any) then writes the final authoritative score.
-export async function replaceFinalScore(
-  initialDocId: string | null,
+export async function submitFinalScore(
   name: string,
   score: number,
   round: number,
@@ -72,20 +50,17 @@ export async function replaceFinalScore(
   defaultRate: number
 ): Promise<void> {
   if (!db) return;
-  const data = { name, score, round, maxRounds, defaultRate, timestamp: Date.now() };
-
-  if (initialDocId) {
-    try {
-      await deleteDoc(doc(db, 'leaderboard', initialDocId));
-    } catch {
-      // Delete blocked by rules — the placeholder stays, but we still write the final entry.
-    }
-  }
-
   try {
-    await addDoc(collection(db, 'leaderboard'), data);
+    await addDoc(collection(db, 'leaderboard'), {
+      name,
+      score,
+      round,
+      maxRounds,
+      defaultRate,
+      timestamp: Date.now(),
+    });
   } catch (err) {
-    console.error('Failed to submit final score:', err);
+    console.error('Failed to submit score:', err);
   }
 }
 
