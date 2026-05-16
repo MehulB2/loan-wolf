@@ -3,6 +3,39 @@ import type { EconomicEvent } from '../types/events';
 import { LGD } from './constants';
 import { getActiveMultiplier } from './economicEvents';
 
+function generateDefaultReason(
+  loan: Loan,
+  multiplier: number,
+  effectivePD: number,
+  events: EconomicEvent[]
+): string {
+  const pdPct = Math.round(effectivePD * 100);
+  const basePdPct = Math.round(loan.hiddenPD * 100);
+
+  const affectingEvents = events.filter(e =>
+    !e.affectedIndustries || e.affectedIndustries.includes(loan.industry)
+  );
+
+  if (affectingEvents.length > 0 && multiplier > 1.15) {
+    const evt = affectingEvents[0];
+    return `${evt.name} hit the ${loan.industry} sector hard, pushing this borrower's default probability from ${basePdPct}% up to ${pdPct}%.`;
+  }
+
+  if (effectivePD >= 0.7) {
+    return `Extremely high-risk borrower — default probability was ${pdPct}%. The ${loan.purpose.toLowerCase()} loan was always a long shot.`;
+  }
+
+  if (effectivePD >= 0.45) {
+    return `Above-average default risk at ${pdPct}%. ${loan.industry} sector conditions contributed to the shortfall.`;
+  }
+
+  if (effectivePD >= 0.25) {
+    return `Moderate risk borrower (PD: ${pdPct}%) — even mid-range loans default occasionally. This one didn't repay.`;
+  }
+
+  return `Low-probability default — this borrower had only a ${pdPct}% chance of defaulting, but statistical variance happens.`;
+}
+
 export function resolveLoans(
   loans: Loan[],
   events: EconomicEvent[]
@@ -36,6 +69,7 @@ export function resolveLoans(
         borrowerName: loan.borrowerName,
         outcome: 'default',
         pnl: -loss,
+        reason: generateDefaultReason(loan, multiplier, effectivePD, events),
       });
       cashDelta -= loss;
     } else {

@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '../hooks/useGameStore';
 import MetricsPanel from './MetricsPanel';
@@ -21,6 +22,7 @@ export default function Dashboard() {
   })));
 
   const recentOutcomes = lastRoundOutcomes.slice(-5).reverse();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -112,26 +114,57 @@ export default function Dashboard() {
               <p className="text-slate-600 font-mono text-xs text-center py-3">No outcomes yet</p>
             ) : (
               <div className="space-y-2">
-                {recentOutcomes.map((outcome) => (
-                  <motion.div
-                    key={outcome.loanId}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className={`flex items-center justify-between p-2 rounded-lg ${
-                      outcome.outcome === 'repaid'
-                        ? 'bg-[#00FF9D]/5 border border-[#00FF9D]/15'
-                        : 'bg-[#FF3366]/5 border border-[#FF3366]/15'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{outcome.outcome === 'repaid' ? '✅' : '❌'}</span>
-                      <span className="text-xs font-mono text-slate-300 truncate max-w-24">{outcome.borrowerName}</span>
-                    </div>
-                    <span className={`text-xs font-mono font-bold ${outcome.pnl >= 0 ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
-                      {outcome.pnl >= 0 ? '+' : ''}{formatCurrency(outcome.pnl)}
-                    </span>
-                  </motion.div>
-                ))}
+                {recentOutcomes.map((outcome) => {
+                  const isDefault = outcome.outcome === 'default';
+                  const isExpanded = expandedId === outcome.loanId;
+                  return (
+                    <motion.div
+                      key={outcome.loanId}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className={`rounded-lg border ${
+                        isDefault
+                          ? 'bg-[#FF3366]/5 border-[#FF3366]/15'
+                          : 'bg-[#00FF9D]/5 border-[#00FF9D]/15'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between p-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{isDefault ? '❌' : '✅'}</span>
+                          <span className="text-xs font-mono text-slate-300 truncate max-w-20">{outcome.borrowerName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-mono font-bold ${outcome.pnl >= 0 ? 'text-[#00FF9D]' : 'text-[#FF3366]'}`}>
+                            {outcome.pnl >= 0 ? '+' : ''}{formatCurrency(outcome.pnl)}
+                          </span>
+                          {isDefault && outcome.reason && (
+                            <button
+                              onClick={() => setExpandedId(isExpanded ? null : outcome.loanId)}
+                              className="w-4 h-4 rounded-full border border-[#FF3366]/40 text-[#FF3366] text-[9px] font-mono font-bold leading-none flex items-center justify-center hover:bg-[#FF3366]/20 transition-colors cursor-pointer flex-shrink-0"
+                              title="Why did this default?"
+                            >
+                              ?
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {isExpanded && outcome.reason && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <p className="px-2 pb-2 text-[10px] font-mono text-slate-400 leading-relaxed border-t border-[#FF3366]/10 pt-1.5">
+                              {outcome.reason}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </div>

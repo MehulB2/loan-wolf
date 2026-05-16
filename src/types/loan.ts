@@ -21,4 +21,5 @@ export interface RoundOutcome {
   borrowerName: string;
   outcome: 'default' | 'repaid';
   pnl: number;
+  reason?: string;
 }
