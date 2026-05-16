@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, orderBy, limit, setDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, setDoc, doc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -48,20 +48,23 @@ export async function upsertScore(
   score: number,
   round: number,
   maxRounds: number,
-  defaultRate: number
+  defaultRate: number,
+  isFinal = false
 ): Promise<void> {
   if (!db) return;
+  const data = { name, score, round, maxRounds, defaultRate, timestamp: Date.now() };
   try {
-    await setDoc(doc(db, 'leaderboard', gameId), {
-      name,
-      score,
-      round,
-      maxRounds,
-      defaultRate,
-      timestamp: Date.now(),
-    });
-  } catch (err) {
-    console.error('Failed to upsert score:', err);
+    await setDoc(doc(db, 'leaderboard', gameId), data);
+  } catch {
+    // setDoc failed (likely Firestore rules block updates on existing docs).
+    // For final submissions, fall back to addDoc so the score always lands.
+    if (isFinal) {
+      try {
+        await addDoc(collection(db, 'leaderboard'), data);
+      } catch (err) {
+        console.error('Failed to submit final score:', err);
+      }
+    }
   }
 }
 

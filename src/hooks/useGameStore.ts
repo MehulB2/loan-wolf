@@ -54,7 +54,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       playerName,
       gameId,
     });
-    upsertScore(gameId, playerName, 0, 1, mode, 0);
   },
 
   approveLoan: (borrowerId: string, premium: boolean) => {
@@ -161,7 +160,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       // Check game end conditions — await upsert before transitioning so the
       // leaderboard fetch in GameOver sees the final score immediately.
       if (newCash <= BANKRUPTCY_THRESHOLD) {
-        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
+        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate, true);
         set({
           phase: 'gameover',
           result: 'bankrupt',
@@ -179,7 +178,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
 
       if (currentState.round >= currentState.maxRounds) {
-        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate);
+        if (gameId) await upsertScore(gameId, playerName, newScore, currentState.round, currentState.maxRounds, defaultRate, true);
         set({
           phase: 'gameover',
           result: 'win',
