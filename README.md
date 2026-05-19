@@ -8,13 +8,13 @@ A browser-based lending simulation game where you play as the head of a loan fir
 
 ## How to Play
 
-Each round you're presented with borrowers — real names, credit scores, income, debt levels, employment history, and behavioral risk flags. You decide:
+Each round you're presented with borrowers - real names, credit scores, income, debt levels, employment history, and behavioral risk flags. You decide:
 
 - **Swipe right** — approve the loan at the suggested rate
 - **Swipe up** — approve at a premium rate (+2.5%)
 - **Swipe left** — reject the borrower (costs reputation)
 
-After every borrower is processed the round resolves: each active loan either repays (you earn one month of interest) or defaults (you lose 45% of the principal). Economic events — recessions, rate hikes, sector crashes — fire randomly and shift default probabilities across your portfolio.
+After every borrower is processed the round resolves: each active loan either repays (you earn one month of interest) or defaults (you lose 45% of the principal). Economic events - recessions, rate hikes, sector crashes — fire randomly and shift default probabilities across your portfolio.
 
 Run out of cash and you're bankrupt. Survive your chosen number of rounds and you win.
 
