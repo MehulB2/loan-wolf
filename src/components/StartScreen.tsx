@@ -111,7 +111,7 @@ export default function StartScreen() {
         {/* Mechanics */}
         <motion.div
           variants={item}
-          className="grid grid-cols-3 gap-4 mb-10"
+          className="grid grid-cols-3 gap-2 md:gap-4 mb-8 md:mb-10"
         >
           {[
             { dir: '→', label: 'Swipe Right', desc: 'Approve loan', color: '#00FF9D' },
@@ -120,11 +120,11 @@ export default function StartScreen() {
           ].map(({ dir, label, desc, color }) => (
             <div
               key={label}
-              className="rounded-xl border border-[#1E2435] bg-[#141824] p-4"
+              className="rounded-xl border border-[#1E2435] bg-[#141824] p-3 md:p-4"
             >
-              <div className="text-3xl font-mono font-bold mb-1" style={{ color }}>{dir}</div>
-              <div className="text-sm font-mono font-semibold text-slate-200">{label}</div>
-              <div className="text-xs text-slate-500 mt-1">{desc}</div>
+              <div className="text-2xl md:text-3xl font-mono font-bold mb-1" style={{ color }}>{dir}</div>
+              <div className="text-xs md:text-sm font-mono font-semibold text-slate-200">{label}</div>
+              <div className="text-xs text-slate-500 mt-1 hidden sm:block">{desc}</div>
             </div>
           ))}
         </motion.div>

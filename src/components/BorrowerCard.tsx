@@ -128,7 +128,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
           border: '2px solid #00FF9D',
         }}
       >
-        <span className="text-4xl font-mono font-black text-[#00FF9D] rotate-[-15deg] border-4 border-[#00FF9D] px-4 py-2 rounded-lg">
+        <span className="text-2xl md:text-4xl font-mono font-black text-[#00FF9D] rotate-[-15deg] border-2 md:border-4 border-[#00FF9D] px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
           APPROVE ✓
         </span>
       </motion.div>
@@ -142,7 +142,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
           border: '2px solid #FF3366',
         }}
       >
-        <span className="text-4xl font-mono font-black text-[#FF3366] rotate-[15deg] border-4 border-[#FF3366] px-4 py-2 rounded-lg">
+        <span className="text-2xl md:text-4xl font-mono font-black text-[#FF3366] rotate-[15deg] border-2 md:border-4 border-[#FF3366] px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
           REJECT ✗
         </span>
       </motion.div>
@@ -156,7 +156,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
           border: '2px solid #00D4FF',
         }}
       >
-        <span className="text-4xl font-mono font-black text-[#00D4FF] border-4 border-[#00D4FF] px-4 py-2 rounded-lg">
+        <span className="text-2xl md:text-4xl font-mono font-black text-[#00D4FF] border-2 md:border-4 border-[#00D4FF] px-3 md:px-4 py-1.5 md:py-2 rounded-lg">
           PREMIUM ★
         </span>
       </motion.div>
@@ -164,10 +164,10 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
       {/* Card content */}
       <div className="w-full h-full rounded-xl border border-[#1E2435] bg-[#141824] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="px-5 pt-5 pb-3 border-b border-[#1E2435]">
-          <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="px-3 pt-3 pb-2 md:px-5 md:pt-5 md:pb-3 border-b border-[#1E2435]">
+          <div className="flex items-start justify-between gap-2 mb-2 md:mb-3">
             <div>
-              <h3 className="text-slate-100 font-mono font-bold text-lg leading-tight">{borrower.name}</h3>
+              <h3 className="text-slate-100 font-mono font-bold text-base md:text-lg leading-tight">{borrower.name}</h3>
               <span className="text-xs text-slate-500 font-mono">{borrower.industry}</span>
             </div>
             <CreditScoreBadge score={borrower.creditScore} />
@@ -175,7 +175,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
           <div>
             <div className="text-xs text-slate-500 font-mono mb-0.5">Loan Request</div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-mono font-bold text-[#00D4FF]">{formatCurrency(borrower.loanAmount)}</span>
+              <span className="text-xl md:text-2xl font-mono font-bold text-[#00D4FF]">{formatCurrency(borrower.loanAmount)}</span>
               <span className="text-xs text-slate-500 font-mono">· {borrower.loanPurpose}</span>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
 
         {/* Body */}
         {!flipped ? (
-          <div className="flex-1 px-5 py-4 space-y-3 overflow-y-auto">
+          <div className="flex-1 px-3 py-3 md:px-5 md:py-4 space-y-2 md:space-y-3 overflow-y-auto">
             {/* Income & Debt */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-[#0A0E1A] rounded-lg p-3">
@@ -256,7 +256,7 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
           </div>
         ) : (
           /* Flipped - detailed view */
-          <div className="flex-1 px-5 py-4 space-y-3 overflow-y-auto">
+          <div className="flex-1 px-3 py-3 md:px-5 md:py-4 space-y-2 md:space-y-3 overflow-y-auto">
             <div className="text-xs text-[#00D4FF] font-mono uppercase tracking-widest mb-3">Detailed Analysis</div>
 
             <div className="space-y-2">
@@ -285,15 +285,10 @@ export default function BorrowerCard({ borrower, onSwipe, isTop, stackIndex }: P
         )}
 
         {/* Footer hint */}
-        <div className="px-5 pb-3 pt-2 border-t border-[#1E2435]">
+        <div className="px-3 pb-2 pt-2 md:px-5 md:pb-3 border-t border-[#1E2435]">
           <p className="text-xs text-slate-600 font-mono text-center">
-            {flipped ? 'Tap to flip back · Swipe to decide' : 'Tap for details · Swipe to decide'}
+            {flipped ? 'Tap to flip back' : 'Tap for details'}
           </p>
-          <div className="flex justify-center gap-4 mt-2">
-            <span className="text-xs font-mono text-[#FF3366]">← Reject</span>
-            <span className="text-xs font-mono text-[#00D4FF]">↑ Premium</span>
-            <span className="text-xs font-mono text-[#00FF9D]">Approve →</span>
-          </div>
         </div>
       </div>
 

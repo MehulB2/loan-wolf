@@ -52,10 +52,10 @@ export default function CardStack() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className="flex flex-col items-center h-full min-h-0">
       {/* Queue indicator */}
       {currentBorrowers.length > 0 && (
-        <div className="mb-4 flex items-center gap-2">
+        <div className="mb-2 md:mb-3 flex items-center gap-2 flex-shrink-0">
           {currentBorrowers.map((b, i) => (
             <div
               key={b.id}
@@ -69,7 +69,7 @@ export default function CardStack() {
       )}
 
       {/* Card Stack */}
-      <div className="relative w-full" style={{ height: 'min(460px, calc(100svh - 260px))' }}>
+      <div className="relative w-full flex-1 min-h-0" style={{ maxHeight: '460px' }}>
         <AnimatePresence>
           {visibleBorrowers.map((borrower, index) => (
             <motion.div
@@ -95,9 +95,34 @@ export default function CardStack() {
         </AnimatePresence>
       </div>
 
-      {/* Swipe hints */}
+      {/* Mobile: tap buttons */}
+      {currentBorrowers.length > 0 && phase === 'playing' && (
+        <div className="flex md:hidden gap-2 mt-3 w-full flex-shrink-0">
+          <button
+            onClick={() => handleSwipe('left')}
+            className="flex-1 py-3 rounded-xl font-mono font-bold text-sm border border-[#FF3366]/40 bg-[#FF3366]/10 text-[#FF3366] active:scale-95 transition-transform select-none"
+          >
+            ✗ Reject
+          </button>
+          <button
+            onClick={() => handleSwipe('up')}
+            className="px-5 py-3 rounded-xl font-mono font-bold text-base border border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF] active:scale-95 transition-transform select-none"
+            title="Premium rate"
+          >
+            ★
+          </button>
+          <button
+            onClick={() => handleSwipe('right')}
+            className="flex-1 py-3 rounded-xl font-mono font-bold text-sm border border-[#00FF9D]/40 bg-[#00FF9D]/10 text-[#00FF9D] active:scale-95 transition-transform select-none"
+          >
+            Approve ✓
+          </button>
+        </div>
+      )}
+
+      {/* Desktop: swipe hints */}
       {currentBorrowers.length > 0 && (
-        <div className="mt-4 flex gap-8 text-xs font-mono">
+        <div className="hidden md:flex mt-4 gap-8 text-xs font-mono flex-shrink-0">
           <span className="text-[#FF3366] flex items-center gap-1">
             <span>←</span> Reject
           </span>

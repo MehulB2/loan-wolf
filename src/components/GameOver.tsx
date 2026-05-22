@@ -59,14 +59,14 @@ export default function GameOver() {
           initial={{ scale: 0.8, y: 40, opacity: 0 }}
           animate={{ scale: 1, y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-          className="rounded-2xl border p-8"
+          className="rounded-2xl border p-4 md:p-8"
           style={{ background: themeBg, borderColor: themeBorder }}
         >
           {/* Title */}
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-3">{isWin ? '🏆' : '💥'}</div>
+          <div className="text-center mb-6 md:mb-8">
+            <div className="text-5xl md:text-6xl mb-2 md:mb-3">{isWin ? '🏆' : '💥'}</div>
             <h1
-              className="text-5xl font-mono font-black tracking-tight mb-2"
+              className="text-4xl md:text-5xl font-mono font-black tracking-tight mb-2"
               style={{ color: themeColor }}
             >
               {isWin ? 'SURVIVED!' : 'BANKRUPT'}
@@ -79,7 +79,7 @@ export default function GameOver() {
           </div>
 
           {/* Stats grid */}
-          <div className="grid grid-cols-2 gap-3 mb-8">
+          <div className="grid grid-cols-2 gap-2 md:gap-3 mb-6 md:mb-8">
             {[
               { label: 'Final Cash', value: formatCurrency(state.cash), color: state.cash >= 0 ? '#00FF9D' : '#FF3366' },
               { label: 'Total P&L', value: `${state.totalProfit >= 0 ? '+' : ''}${formatCurrency(state.totalProfit)}`, color: state.totalProfit >= 0 ? '#00FF9D' : '#FF3366' },
@@ -96,7 +96,7 @@ export default function GameOver() {
           </div>
 
           {/* Score */}
-          <div className="text-center mb-8 py-4 rounded-xl border border-[#FFB800]/30 bg-[#FFB800]/5">
+          <div className="text-center mb-6 md:mb-8 py-4 rounded-xl border border-[#FFB800]/30 bg-[#FFB800]/5">
             <div className="text-xs text-slate-500 font-mono uppercase tracking-widest mb-1">Final Score</div>
             <div className="text-4xl font-mono font-black text-[#FFB800]">
               {Math.round(state.score).toLocaleString()}

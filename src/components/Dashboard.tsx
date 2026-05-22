@@ -35,7 +35,7 @@ export default function Dashboard() {
       <EventBanner />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-[#1E2435] bg-[#0A0E1A] z-10">
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-[#1E2435] bg-[#0A0E1A] z-10">
         <div className="flex items-center gap-3">
           <span
             className="text-lg font-mono font-black tracking-tight"
@@ -48,13 +48,13 @@ export default function Dashboard() {
           >
             LOAN WOLF
           </span>
-          <span className="text-xs font-mono text-slate-500">Lending Simulator</span>
+          <span className="text-xs font-mono text-slate-500 hidden sm:inline">Lending Simulator</span>
         </div>
-        <div className="flex items-center gap-4 text-xs font-mono">
+        <div className="flex items-center gap-2 md:gap-4 text-xs font-mono">
           <div className={`px-2 py-1 rounded ${phase === 'resolving' ? 'bg-[#FFB800]/10 text-[#FFB800]' : 'bg-[#00FF9D]/10 text-[#00FF9D]'}`}>
-            {phase === 'resolving' ? '⏳ RESOLVING' : '▶ PLAYING'}
+            {phase === 'resolving' ? '⏳' : '▶'}<span className="hidden sm:inline"> {phase === 'resolving' ? 'RESOLVING' : 'PLAYING'}</span>
           </div>
-          <span className="text-slate-400">Round <span className="text-[#00D4FF] font-bold">{round}</span> / {maxRounds}</span>
+          <span className="text-slate-400">R<span className="hidden sm:inline">ound </span><span className="text-[#00D4FF] font-bold">{round}</span>/{maxRounds}</span>
         </div>
       </div>
 
@@ -81,23 +81,23 @@ export default function Dashboard() {
       </div>
 
       {/* Main layout */}
-      <div className="flex-1 flex gap-0 overflow-hidden" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+      <div className="flex-1 flex gap-0 overflow-hidden min-h-0">
         {/* Left: Metrics — desktop only */}
         <div className="hidden md:block w-64 flex-shrink-0 p-4 border-r border-[#1E2435] overflow-y-auto">
           <MetricsPanel />
         </div>
 
         {/* Center: Card Stack */}
-        <div className="flex-1 flex flex-col p-4 min-w-0">
-          <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col p-3 md:p-4 min-w-0 min-h-0">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Section header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2 md:mb-3 flex-shrink-0">
               <h2 className="text-xs font-mono text-slate-500 uppercase tracking-widest">Borrower Queue</h2>
               {phase === 'playing' && (
-                <span className="text-xs font-mono text-slate-600">Tap card to flip · Drag to decide</span>
+                <span className="text-xs font-mono text-slate-600 hidden sm:inline">Tap card to flip · Drag to decide</span>
               )}
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-h-0">
               <CardStack />
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom: Performance Chart */}
-      <div className="h-32 md:h-48 flex-shrink-0 border-t border-[#1E2435] px-4 py-3">
+      <div className="h-24 md:h-48 flex-shrink-0 border-t border-[#1E2435] px-3 md:px-4 py-2 md:py-3">
         <PerformanceChart />
       </div>
     </motion.div>
